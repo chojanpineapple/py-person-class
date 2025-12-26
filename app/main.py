@@ -4,26 +4,26 @@ class Person:
     def __init__(self, name: str, age: int):
         self.name = name
         self.age = age
-        self.people[name] = Person
+        self.wife = None
+        self.husband = None
+        Person.people[name] = self
 
 
 def create_person_list(people: list) -> list:
-    result = [
-    (
-        {**p, "wife": p.get("wife") or next(
-            (x["name"] for x in people if x.get("husband") == p["name"]),
-            None
-        )}
-        if "wife" in p
-        else
-        {**p, "husband": p.get("husband") or next(
-            (x["name"] for x in people if x.get("wife") == p["name"]),
-            None
-        )}
-    )
-    for p in people
-]
+    # 1. Create all Person instances (list comprehension)
+    persons = [Person(p["name"], p["age"]) for p in people]
 
+    # 2. Link spouses AFTER all objects exist
     for p in people:
-        person = Person(p["name"], p["age"])
-    return result
+        person = Person.people[p["name"]]
+
+        wife_name = p.get("wife")
+        husband_name = p.get("husband")
+
+        if wife_name:
+            person.wife = Person.people.get(wife_name)
+
+        if husband_name:
+            person.husband = Person.people.get(husband_name)
+
+    return persons
